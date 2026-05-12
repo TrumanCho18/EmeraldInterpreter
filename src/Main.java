@@ -13,6 +13,14 @@ public class Main {
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
 
+            while (true) {
+                if (line.startsWith("    ")) {
+                    line = line.substring(4);
+                } else {
+                    break;
+                }
+            }
+
             if (line.split(" ")[0].equals("print")) { //PRINT
 
                 String Query;
@@ -27,17 +35,57 @@ public class Main {
                     System.out.println(Query);
                 }
                 else {
-                    for (int j = 0; j < Memory.size(); j++) {
-                        if (Memory.get(j).get(0).equals(Query)) {
-                            System.out.println(Memory.get(j).get(2));
-                        }
+                    System.out.println(SearchMem(Memory, Query));
+                }
+            } else if (line.split(" ")[0].equals("if")) {
+                int iPlus = 1;
+
+                while (true) {
+                    if ((lines.get(i + iPlus)).equals("}")) {
+                        break;
+                    } else {
+                        iPlus++;
                     }
                 }
+
+                String Query = line.split(" ")[1];
+                Query = Query.substring(1, Query.length() - 1);
+
+
+
+                if (Query.contains("==")) {
+                    String val1 = Query.split(" ")[0];
+                    String val2 = Query.split(" ")[1];
+                    double v1;
+                    double v2;
+
+                    if (isDouble(val1)) {
+                        v1 = Double.parseDouble(val1);
+                    } else {
+                        v1 = Double.parseDouble(SearchMem(Memory, val1));
+                    }
+
+                    if (isDouble(val2)) {
+                        v2 = Double.parseDouble(val2);
+                    } else {
+                        v2 = Double.parseDouble(SearchMem(Memory, val2));
+                    }
+
+                    if (v1 != v2) {
+                        i += iPlus;
+                    }
+                }
+                else {
+                    i += iPlus;
+                }
+
+            } else if (line.equals("}")) { //check for close
+
             }
             else { //VARIABLE DECLARATION
                 String varName = line.split(" ")[0];
                 String varType = "null";
-                String val = "null";
+                String val;
                 if (line.contains("'")) {
                     varType = "String";
                     val = line.split("'")[1];
@@ -66,6 +114,15 @@ public class Main {
             }
         }
         SpitMemory(Memory);
+    }
+
+    public static String SearchMem(ArrayList<ArrayList<String>> Memory, String target) {
+        for (int j = 0; j < Memory.size(); j++) {
+            if (Memory.get(j).get(0).equals(target)) {
+                return Memory.get(j).get(2);
+            }
+        }
+        return "null";
     }
 
     public static void SpitMemory(ArrayList<ArrayList<String>> Memory) {
