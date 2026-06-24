@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) {
 
         ArrayList<String> lines = getFileData("src/Shell");
-        ArrayList<ArrayList<String>> Memory = new ArrayList<>();
+        ArrayList<Cache> Memory = new ArrayList<>();
 
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
@@ -21,7 +21,9 @@ public class Main {
                 }
             }
 
-            if (line.split(" ")[0].equals("print")) { //PRINT
+            if (line.length() > 1 && line.substring(0, 2).equals("--")) { //COMMENT
+
+            } else if (line.split(" ")[0].equals("print")) { //PRINT
 
                 String Query;
                 if (line.contains("'")) {
@@ -35,9 +37,9 @@ public class Main {
                     System.out.println(Query);
                 }
                 else {
-                    System.out.println(SearchMem(Memory, Query));
+                    System.out.println(SearchMemVal(Memory, Query));
                 }
-            } else if (line.split(" ")[0].equals("if")) {
+            } else if (line.split(" ")[0].equals("if")) { //IF STATEMENTS
                 int iPlus = 1;
 
                 while (true) {
@@ -48,27 +50,24 @@ public class Main {
                     }
                 }
 
-                String Query = line.split(" ")[1];
-                Query = Query.substring(1, Query.length() - 1);
-
-
+                String Query = inParenthesis(line);
 
                 if (Query.contains("==")) {
                     String val1 = Query.split(" ")[0];
-                    String val2 = Query.split(" ")[1];
+                    String val2 = Query.split(" ")[2];
                     double v1;
                     double v2;
 
                     if (isDouble(val1)) {
                         v1 = Double.parseDouble(val1);
                     } else {
-                        v1 = Double.parseDouble(SearchMem(Memory, val1));
+                        v1 = Double.parseDouble(SearchMemVal(Memory, val1));
                     }
 
                     if (isDouble(val2)) {
                         v2 = Double.parseDouble(val2);
                     } else {
-                        v2 = Double.parseDouble(SearchMem(Memory, val2));
+                        v2 = Double.parseDouble(SearchMemVal(Memory, val2));
                     }
 
                     if (v1 != v2) {
@@ -83,7 +82,9 @@ public class Main {
 
             }
             else { //VARIABLE DECLARATION
+
                 String varName = line.split(" ")[0];
+
                 String varType = "null";
                 String val;
                 if (line.contains("'")) {
@@ -104,35 +105,41 @@ public class Main {
 
                 }
 
-                ArrayList<String> Cache = new ArrayList<>();
-                Cache.add(varName);
-                Cache.add(varType);
-                Cache.add(val);
-
-                Memory.add(Cache);
-
+                if (SearchMemVal(Memory, varName).equals("null")) {
+                    Cache c = new Cache(varName, varType, val);
+                    Memory.add(c);
+                } else {
+                    SearchMem(Memory, varName).setVarType(varType);
+                    SearchMem(Memory, varName).setValue(val);
+                }
             }
         }
         SpitMemory(Memory);
     }
 
-    public static String SearchMem(ArrayList<ArrayList<String>> Memory, String target) {
+    public static String SearchMemVal(ArrayList<Cache> Memory, String target) {
         for (int j = 0; j < Memory.size(); j++) {
-            if (Memory.get(j).get(0).equals(target)) {
-                return Memory.get(j).get(2);
+            if (Memory.get(j).getName().equals(target)) {
+                return Memory.get(j).getValue();
             }
         }
         return "null";
     }
 
-    public static void SpitMemory(ArrayList<ArrayList<String>> Memory) {
+    public static Cache SearchMem(ArrayList<Cache> Memory, String target) {
+        for (int j = 0; j < Memory.size(); j++) {
+            if (Memory.get(j).getName().equals(target)) {
+                return Memory.get(j);
+            }
+        }
+        return (null);
+    }
+
+    public static void SpitMemory(ArrayList<Cache> Memory) {
         System.out.println();
         System.out.println("--MEMORY CACHES--");
         for (int i = 0; i < Memory.size(); i++) {
-            for (int j = 0; j < Memory.get(i).size(); j++) {
-                System.out.print(Memory.get(i).get(j) + " | ");
-            }
-            System.out.println();
+            System.out.println(Memory.get(i));
         }
     }
 
@@ -165,6 +172,23 @@ public class Main {
             return false;
         }
         return str.charAt(0) == '\'' && str.charAt(str.length() - 1) == '\'';
+    }
+
+    public static String inParenthesis(String str) {
+        boolean include = false;
+        String ans = "";
+        for (int i = 0; i < str.length(); i++) {
+            if (str.substring(i, i + 1).equals("(")) {
+                include = true;
+            } else if (str.substring(i, i + 1).equals(")")) {
+                include = false;
+            } else {
+                if (include) {
+                    ans += str.substring(i, i + 1);
+                }
+            }
+        }
+        return ans;
     }
 
     public static ArrayList<String> getFileData(String fileName) {

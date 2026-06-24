@@ -1,7 +1,7 @@
-x = 5
-print ('hello, world!')
+x = 100
+y = 100
 
-if (x == 4) {
-    print ('x is five')
+if (x == y) {
+    print ('x is equal to y')
 }
-print ('goodbye, world!')
+
