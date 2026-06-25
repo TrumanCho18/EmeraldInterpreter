@@ -41,9 +41,20 @@ public class Main {
                 }
             } else if (line.split(" ")[0].equals("if")) { //IF STATEMENTS
                 int iPlus = 1;
+                int elsePlus = 0;
 
                 while (true) {
                     if ((lines.get(i + iPlus)).equals("}")) {
+                        break;
+                    } else if ((lines.get(i + iPlus)).equals("} else {")) {
+                        elsePlus = 1;
+                        while (true) {
+                            if ((lines.get(i + elsePlus)).equals("}")) {
+                                break;
+                            } else {
+                                elsePlus++;
+                            }
+                        }
                         break;
                     } else {
                         iPlus++;
@@ -78,7 +89,7 @@ public class Main {
                     i += iPlus;
                 }
 
-            } else if (line.equals("}")) { //check for close
+            } else if (line.equals("}") || line.equals("} else {")) { //check for close
 
             }
             else { //VARIABLE DECLARATION
